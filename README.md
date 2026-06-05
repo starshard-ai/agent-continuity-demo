@@ -35,6 +35,13 @@ This repo is the smallest honest proof that the core primitives are real, not a
 pitch deck. It is not a framework and it does not replace your runtime; it sits
 above it.
 
+**This repo is the reference implementation of the
+[Fleet Coordination Protocol (FCP)](https://github.com/starshard-ai/fleet-coordination-protocol).**
+FCP is a narrow, descriptive `v0` spec for the four record shapes below — the
+wire a runtime reads and writes to participate. The shapes in that spec are
+derived from the code in *this* repo. A DRAFT adapter mapping FCP onto Letta's
+memory layer lives in [`adapters/letta`](adapters/letta).
+
 ---
 
 Below is a tiny, real demonstration of two of those primitives — cross-agent
