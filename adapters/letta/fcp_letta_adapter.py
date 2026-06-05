@@ -14,18 +14,22 @@ layer ABOVE single-agent runtimes; Letta is one such runtime. The adapter maps
 FCP's shared-memory fact record onto Letta's two memory surfaces:
 
   * Letta CORE MEMORY BLOCKS  -> short, always-in-context, label/value strings
-      (client.agents.blocks.update(agent_id, block_label, value) /
-       client.agents.blocks.retrieve(...); agent tools core_memory_append /
-       core_memory_replace). Good for a small set of hot FCP facts a Letta
-       agent should always see.
+      (client.agents.blocks.update(block_label, agent_id=, value=) /
+       client.agents.blocks.list(agent_id=)). Good for a small set of hot FCP
+       facts a Letta agent should always see.
   * Letta ARCHIVAL PASSAGES   -> embedding-backed long-term store
-      (client.archives.passages.create(text=...) / archival_memory_search).
-       Good for the long tail of FCP facts, searchable semantically.
+      (client.agents.passages.create(agent_id, text=...)). Good for the long
+       tail of FCP facts, searchable semantically.
 
-This is DRAFT. It targets the Letta Python SDK surface as documented at
-docs.letta.com (SDK 1.0: blocks.update, archives.passages.create). The real
-`letta-client` is an OPTIONAL dependency — import is lazy so the conformance
-test runs with zero third-party deps against an in-process fake client.
+This is DRAFT. It targets the real `letta-client` SDK surface, verified by
+introspection against letta-client==1.12.1: agents.blocks.update(block_label,
+*, agent_id, value), agents.blocks.list(agent_id), and
+agents.passages.create(agent_id, *, text). NOTE: the agent-scoped archival
+write is `agents.passages.create(agent_id=...)`, NOT
+`archives.passages.create(...)` — the latter is archive-scoped and takes an
+`archive_id`, not an `agent_id`. The real `letta-client` is an OPTIONAL
+dependency — import is lazy so the conformance test runs with zero third-party
+deps against an in-process fake client mirroring this surface.
 
 NOT submitted anywhere. No PR, no issue, no contact with the Letta project.
 """
@@ -160,7 +164,7 @@ class LettaFCPAdapter:
             ref = label
         else:
             surface = "archival_passage"
-            self.client.archives.passages.create(
+            self.client.agents.passages.create(
                 agent_id=self.agent_id,
                 text=fact_to_passage_text(fact),
             )
@@ -181,7 +185,7 @@ class LettaFCPAdapter:
             f"(source={signal['rejected']['source']}) "
             f"held_confidence={signal.get('held_confidence')}"
         )
-        self.client.archives.passages.create(agent_id=self.agent_id, text=text)
+        self.client.agents.passages.create(agent_id=self.agent_id, text=text)
         entry = {"surface": "archival_passage", "fcp_key": signal["key"],
                  "ref": "quarantine"}
         self.write_log.append(entry)

@@ -30,4 +30,6 @@ python3 test_fcp_letta_conformance.py
 ```
 
 Zero third-party deps — drives the adapter against an in-process fake Letta
-client. The real `letta-client` is an optional dependency for live use.
+client that mirrors the real SDK surface (verified against
+`letta-client==1.12.1`). The real `letta-client` is an optional dependency for
+live use; see `PROPOSED_PR.md` for the verified SDK-call table and caveats.

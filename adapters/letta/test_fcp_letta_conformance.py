@@ -3,8 +3,9 @@
 Conformance test for the FCP <-> Letta adapter (DRAFT).
 
 Zero third-party deps: drives the adapter against an in-process FakeLettaClient
-that mimics the Letta SDK surface the adapter touches
-(client.agents.blocks.update / .list, client.archives.passages.create).
+that mimics the real Letta SDK surface the adapter touches, verified by
+introspection against letta-client==1.12.1:
+(client.agents.blocks.update / .list, client.agents.passages.create).
 
 Proves:
   1. A confident (hot) FCP fact lands in a Letta CORE BLOCK, namespaced fcp::.
@@ -53,12 +54,11 @@ class _Passages:
 
 
 class _Agents:
-    def __init__(self, blocks):
+    # Mirrors letta-client==1.12.1: passages are agent-scoped under
+    # client.agents.passages.create(agent_id, *, text) — NOT archives.passages
+    # (which is archive-scoped and takes archive_id, not agent_id).
+    def __init__(self, blocks, passages):
         self.blocks = blocks
-
-
-class _Archives:
-    def __init__(self, passages):
         self.passages = passages
 
 
@@ -66,8 +66,7 @@ class FakeLettaClient:
     def __init__(self):
         self._blocks = _Blocks()
         self._passages = _Passages()
-        self.agents = _Agents(self._blocks)
-        self.archives = _Archives(self._passages)
+        self.agents = _Agents(self._blocks, self._passages)
 
 
 # ---- Test helpers ----------------------------------------------------------
