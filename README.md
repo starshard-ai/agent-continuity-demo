@@ -1,6 +1,44 @@
-# agent-continuity-demo
+# Your agents can't see each other. This fixes that.
 
-A tiny, real demonstration of two primitives that make a multi-agent system
+You're running more than one agent now — Claude Code, Codex, Cursor, a cron
+script, a teammate's bot. They can't see each other, can't trust each other's
+memory, and can't be stopped before one of them does something irreversible
+behind your back. The result: stale beliefs, duplicated work, and an email that
+went out before you ever saw it.
+
+Give them **one shared memory, one permission gate, and one receipt per action**
+— a thin coordination layer that runs *above* whatever runtime you already use,
+so your fleet cooperates instead of colliding.
+
+The four primitives, all checkable in this repo:
+
+- **Shared cross-agent / cross-device memory** — one hub every agent reads and
+  writes; no in-process handoff required.
+- **A permission gate before irreversible actions** — content-gated, not
+  act-gated: the boundary travels with the data, not the verb.
+- **A receipt for every action** — an auditable record any other session can
+  replay or retract.
+- **Cross-session work-claims** — agents claim work so two don't redo or
+  contradict each other.
+
+> **Architecture, one layer down:** this is the cooperative governance layer
+> your fleet is missing — content-gated permissions + provenance + receipts,
+> *not* LLM-as-CPU scheduling. Call it an Agent-OS layer if you like, but it's a
+> cooperative protocol agents opt into, not a hardware-enforced kernel. It runs
+> above any runtime (Claude Code, Codex, Hermes, OpenClaw) and is interoperable
+> by design.
+
+**What it is / why it exists.** Single agents already work. The unsolved problem
+is *many* agents sharing state without losing, contradicting, or clobbering each
+other — and without one of them taking an irreversible action no human approved.
+This repo is the smallest honest proof that the core primitives are real, not a
+pitch deck. It is not a framework and it does not replace your runtime; it sits
+above it.
+
+---
+
+Below is a tiny, real demonstration of two of those primitives — cross-agent
+continuity and belief-conflict detection — that make a multi-agent system
 behave like one coherent mind instead of a swarm of amnesiacs:
 
 1. **Cross-agent continuity** — agent A (a process) writes a fact to a shared
