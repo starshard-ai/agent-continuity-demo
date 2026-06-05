@@ -1,0 +1,7 @@
+# local hub state / env
+*.db
+*.db-journal
+.env
+secrets.env
+__pycache__/
+*.pyc

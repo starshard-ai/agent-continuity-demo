@@ -1,0 +1,39 @@
+==================================================================
+ agent-continuity-demo  —  two agents, one shared memory hub
+==================================================================
+
+[hub] shared memory hub listening on http://127.0.0.1:8787 (db=/tmp/hub.db)
+
+------------------------------------------------------------------
+ 1. CROSS-AGENT CONTINUITY
+------------------------------------------------------------------
+agent-A starts as its own process, writes a fact, then exits.
+[agent-A pid=<pid>] wrote fact to hub: project_deadline = 'Friday' (belief_mean=0.90)
+(agent-A process has now exited — its memory is gone, only the hub holds the fact.)
+
+agent-B starts LATER as a SEPARATE process. It never talked to agent-A.
+It reads the shared hub and already knows what agent-A learned:
+[agent-B pid=<pid>] read fact from hub (written by a DIFFERENT process): project_deadline = 'Friday'
+           -> source recorded in hub: agent-A | belief_mean=0.90
+
+>> Continuity proven: a fact survived the death of the process that wrote it,
+   and a different process picked it up with zero direct handoff.
+
+------------------------------------------------------------------
+ 2. BELIEF-CONFLICT CAUGHT (quarantine, not silent overwrite)
+------------------------------------------------------------------
+An external source now writes a CONFLICTING value for the same fact.
+The hub holds 'Friday' with high confidence. The external write says 'Thursday'.
+[external-source pid=<pid>] proposed project_deadline = 'Thursday'
+[hub] conflict quarantined: project_deadline {agent-A:Friday, external-source:Thursday} -> flagged, not silently overwritten (held_confidence=0.75)
+
+The hub did NOT overwrite. The held fact is still intact:
+[agent-B pid=<pid>] read fact from hub (written by a DIFFERENT process): project_deadline = 'Friday'
+           -> source recorded in hub: agent-A | belief_mean=0.75
+
+>> Conflict caught: the disagreement was recorded and quarantined for review
+   instead of silently clobbering the held belief.
+
+==================================================================
+ DONE — both behaviors demonstrated over the real shared hub.
+==================================================================
